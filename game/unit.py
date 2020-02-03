@@ -87,6 +87,25 @@ class Unit:
             self.arm_ += stuff.give_arm_
             return self.hp_, self.arm_
 
+    def item_unbuff(self, itm):
+        if itm.give_hp_ is not None and itm.give_dmg_ is not None and itm.give_arm_ is not None:
+            self.hp_ -= itm.give_hp_
+            self.dmg_ -= itm.give_dmg_
+            self.arm_ -= itm.give_arm_
+            return self.hp_, self.dmg_, self.arm_
+        elif itm.give_hp_ is not None and itm.give_dmg_:
+            self.hp_ -= itm.give_hp_
+            self.dmg_ -= itm.give_dmg_
+            return self.dmg_, self.hp_
+        elif itm.give_dmg_ is not None and itm.give_arm_:
+            self.dmg_ -= itm.give_dmg_
+            self.arm_ -= itm.give_arm_
+            return self.dmg_, self.arm_
+        elif itm.give_hp_ is not None and itm.give_arm_ is not None:
+            self.hp_ -= itm.give_hp_
+            self.arm_ -= itm.give_arm_
+            return self.hp_, self.arm_
+
     def check_slot(self, atr):
         """проверяет на какой слот даное снаряжение"""
         if isinstance(atr, i.RightHand):
@@ -131,9 +150,37 @@ class Unit:
 
     def unwear(self, slot):
         """функция снятия снаряжения"""
-        if slot is not None:
-            slot = None
-            return slot
+        if isinstance(slot, i.RightHand):
+            self.right_hand_slot_ = None
+            self.item_unbuff(slot)
+            return self.right_hand_slot_
+        elif isinstance(slot, i.LeftHand):
+            self.left_hand_slot_ = None
+            self.item_unbuff(slot)
+            return self.left_hand_slot_
         elif isinstance(slot, i.TwoHand):
-            slot = None
-            return slot
+            self.right_hand_slot_ = None
+            self.left_hand_slot_ = None
+            self.item_unbuff(slot)
+            return self.right_hand_slot_, self.left_hand_slot_
+        elif isinstance(slot, i.Head):
+            self.head_slot_ = None
+            self.item_unbuff(slot)
+            return self.head_slot_
+        elif isinstance(slot, i.Body):
+            self.body_slot_ = None
+            self.item_unbuff(slot)
+            return self.body_slot_
+        elif isinstance(slot, i.Arms):
+            self.arms_slot_ = None
+            self.item_unbuff(slot)
+            return self.arms_slot_
+        elif isinstance(slot, i.Legs):
+            self.legs_slot_ = None
+            self.item_unbuff(slot)
+            return self.legs_slot_
+        elif isinstance(slot, i.Artifact):
+            self.artifact_slot_ = None
+            self.item_unbuff(slot)
+            return self.artifact_slot_
+
