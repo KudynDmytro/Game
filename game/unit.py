@@ -1,10 +1,12 @@
 import random as rand
 import game.items as i
+import datetime
+import time
 
 
 class Unit:
-    def __init__(self, name, hp, dmg, arm, head_slot=None, body_slot=None, right_hand_slot=None, left_hand_slot=None,
-                 arms_slot=None, legs_slot=None, artifact_slot=None):
+    def __init__(self, name, hp, dmg, arm, c_chance, d_chance, head_slot=None, body_slot=None, right_hand_slot=None,
+                 left_hand_slot=None, arms_slot=None, legs_slot=None, artifact_slot=None):
         self.name_ = name
         self._chance1 = None
         self._chance2 = None
@@ -15,6 +17,9 @@ class Unit:
         self.arms_slot_ = arms_slot
         self.legs_slot_ = legs_slot
         self.artifact_slot_ = artifact_slot
+        self.set_crit(c_chance)
+        self.dodge(d_chance)
+        self.status = None
         if type(hp) == int and type(dmg) == int and type(arm) == int:
             if hp > 0:
                 self.hp_ = hp
@@ -27,10 +32,13 @@ class Unit:
                 print('Unit can\'t have negative damage or armor!')
         else:
             print('NO, you must enter numbers!')
+        self.stats = {'HP': self.hp_,
+                      'DAMAGE': self.dmg_,
+                      'ARMOR': self.arm_
+                      }
 
     def set_crit(self, arg):
         try:
-            self.chance_ = rand.random()
             if arg >= rand.randint(0, 100):
                 self._chance1 = True
             else:
@@ -54,7 +62,7 @@ class Unit:
 
     def attack(self, enemy):
         """Это функция атаки, она выполняет алгоритм нанесения урона другому юниту"""
-        if type(enemy) != Unit:
+        if not isinstance(enemy, Unit):
             print('You can attack only units')
         if enemy._chance2 == True:
             print('MISS')
@@ -62,8 +70,12 @@ class Unit:
         elif self._chance1 == True:
             print('CRIT')
             enemy.hp_ -= (self.dmg_ * 2 - enemy.arm_)
+            enemy.stats.update({'HP': enemy.hp_})
+            print(f"{self.name_} attacked {enemy.name_}")
         else:
             enemy.hp_ -= (self.dmg_ - enemy.arm_)
+            enemy.stats.update({'HP': enemy.hp_})
+            print(f"{self.name_} attacked {enemy.name_}")
 
         return enemy.hp_
 
@@ -183,4 +195,21 @@ class Unit:
             self.artifact_slot_ = None
             self.item_unbuff(slot)
             return self.artifact_slot_
+
+
+class Warrior(Unit):
+    def __int__(self, name, hp, dmg, arm,c_chance, d_chance, head_slot=None, body_slot=None, right_hand_slot=None,
+                left_hand_slot=None, arms_slot=None, legs_slot=None, artifact_slot=None):
+        self.status = None
+        super().__init__(name, hp, dmg, arm, c_chance=None, d_chance=False, head_slot=None, body_slot=None,
+                         right_hand_slot=None, left_hand_slot=None, arms_slot=None, legs_slot=None, artifact_slot=None)
+
+    def rush(self):
+        self.arm_ += 10
+        self.hp_ += 15
+        return self.stats.update({'HP': self.hp_, 'ARMOR': self.arm_})
+
+    def stun(self, aim):
+        aim.hp_ -= 5
+        aim.status = 'stunned'
 
